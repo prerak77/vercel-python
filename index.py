@@ -10,10 +10,10 @@ app = Flask(__name__, static_folder="frontend/build")
 
 @app.route("/")
 def home():
-    return "python world"
+    return "hello world"
 
 
-@app.route("/data", methods=['POST'])
+@app.route("/data")
 @cross_origin()
 def members():
     request_data = json.loads(request.data)
@@ -24,7 +24,7 @@ def members():
     return (" ")
 
 
-@app.route("/signup", methods=['POST'])
+@app.route("/signup")
 @cross_origin()
 def Signup_Data():
     request_data = json.loads(request.data)
@@ -34,7 +34,7 @@ def Signup_Data():
     return (" ")
 
 
-@app.route("/login_add", methods=['POST'])
+@app.route("/login_add")
 @cross_origin()
 def Login_Data():
     global check_user
@@ -45,7 +45,7 @@ def Login_Data():
     return ('')
 
 
-@app.route("/login_send", methods=['GET'])
+@app.route("/login_send")
 @cross_origin()
 def Login_Data_Send():
     print({"state": [str(check_user)]})
