@@ -41,6 +41,7 @@ def Login_Data():
     check_user = False
     request_data = json.loads(request.data)
     check_user = get_data(request_data)
+    print(check_user)
 
     return ('')
 
