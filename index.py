@@ -40,7 +40,7 @@ def Login_Data():
     global check_user
     check_user = False
     request_data = request.get_json()
-    print(request_data.data)
+    print(request_data)
     check_user = get_data(request_data)
     print(check_user)
 
