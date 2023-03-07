@@ -162,9 +162,8 @@ def insert_table_user(details):
 
 def get_data(id):
     try:
-        VALUES = list(id["content"].values())
+        VALUES = list(id.values())
 
-        print(VALUES[0])
         myconn = mys.connect(host="sql12.freemysqlhosting.net", user="sql12602665",
                              passwd="FAUkhKG9WP", database="sql12602665")
         if myconn.is_connected():
