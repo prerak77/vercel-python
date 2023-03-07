@@ -39,7 +39,7 @@ def Signup_Data():
 def Login_Data():
     global check_user
     check_user = False
-    request_data = json.loads(request.data)
+    request_data = json.loads(request.config)
     print(request_data)
     check_user = get_data(request_data)
     print(check_user)
