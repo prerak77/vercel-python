@@ -2,6 +2,7 @@ import mysql.connector as mys
 from azure.cosmos import CosmosClient, PartitionKey
 from flask_cors import CORS, cross_origin
 import json
+import bcrypt
 import os
 from flask import Flask, json, request, jsonify
 app = Flask(__name__, static_folder="frontend/build")
@@ -55,7 +56,6 @@ def Login_Data_Send():
 
 
 # Azure code
-
 
 ENDPOINT = 'https://de44a99c-0ee0-4-231-b9ee.documents.azure.com:443/'
 KEY = 'dJL5ctFaJWB3YUzdl9sUQt5N1VziPj7G9KDf0z6s5zwpyYoDdvAx0GpSESCHCE5IwF072ML7FdpmACDb1hiQBA=='
@@ -134,7 +134,7 @@ def create_table_user():
         myconn = mys.connect(host="sql12.freemysqlhosting.net",
                              user="sql12602665", passwd="FAUkhKG9WP", database="sql12602665", port="3306")
         mycur = myconn.cursor()
-        query = "CREATE TABLE user_details (name VARCHAR(255), email VARCHAR(255),password VARCHAR(255),ID VARCHAR(255))"
+        query = "CREATE TABLE user_details (name VARCHAR(255), email VARCHAR(255),password VARCHAR(200),ID VARCHAR(255))"
         mycur.execute(query)
         myconn.commit()
         print("Table successfully created")
@@ -147,13 +147,13 @@ def insert_table_user(details):
     try:
         KEYS = list(details["content"].keys())
         VALUES = list(details["content"].values())
+        hashed = bcrypt.hashpw((VALUES[2]).encode("utf-8"), bcrypt.gensalt())
 
-        print(VALUES)
         myconn = mys.connect(host="sql12.freemysqlhosting.net", user="sql12602665",
                              passwd="FAUkhKG9WP", database="sql12602665")
         mycur = myconn.cursor()
         query = "insert into user_details values\
-                                            ('{}','{}','{}','{}')".format(VALUES[0], VALUES[1], VALUES[2], '')
+                                            ('{}','{}','{}','{}')".format(VALUES[0], VALUES[1], hashed.decode("utf-8"), '')
         mycur.execute(query)
         myconn.commit()
     except Exception as e:
@@ -169,20 +169,21 @@ def get_data(id):
         if myconn.is_connected():
             print("Succesfully connected")
         mycur = myconn.cursor()
-        query = "SELECT * FROM user_details where user_details.email = '{}' and user_details.password = '{}' ".format(
-            VALUES[0], VALUES[1])
+        query = "SELECT * FROM user_details where user_details.email = '{}'".format(
+            VALUES[0])
         mycur.execute(query)
         rs = mycur.fetchall()
         print(rs[0])
         if len(rs[0]) != 0:
-            return True
-        else:
-            return False
+            hashed_password = (rs[0][2]).encode()
+            encode_value = (VALUES[1]).encode()
+            if bcrypt.checkpw(encode_value, hashed_password):
+                return True
+            else:
+                return False
     except Exception as e:
         print(e)
 
-
-create_table_user()
 
 if __name__ == '__main__':
     app.run(debug=True)
