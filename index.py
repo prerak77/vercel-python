@@ -1,22 +1,37 @@
-import mysql.connector as mys
-from azure.cosmos import CosmosClient, PartitionKey
-from flask_cors import CORS, cross_origin
-import json
-import bcrypt
-import os
+# All of the imports need to run the server
+#
+# the flask library is used to create the server and host the REST API
+# They include the MySQL connect to MySQL database to store all the user details.
+# the azure cosmos library allow connectivity to the microsoft azure database
+# flsak cors is used help with cross cors compatibilty
+
 from flask import Flask, json, request, jsonify
-app = Flask(__name__, static_folder="frontend/build")
+import bcrypt
+import json
+from flask_cors import CORS, cross_origin
+from azure.cosmos import CosmosClient, PartitionKey
+import mysql.connector as mys
+
+# to initialize the flask framwork
+app = Flask(__name__)
+
+
 # This is the code for all the routes
 
-
+# this is the loaidng page rout that is used as a starting point for the API
+# Remove later
 @app.route("/")
 def home():
-    return "python world"
+    return "Hello world"
+
+# This is a rout that allows to add the BRSR report data to the NoSQL data base in the azure cloud
+# the entry point for the API is /data and it is using th e POST HTTP request
 
 
 @app.route("/data", methods=['POST'])
 @cross_origin()
 def members():
+    # To retieve the data recieved from the frontend and using the json.load function
     request_data = json.loads(request.data)
     CREATE_DATABASE()
     ADDING_NEW_ELEMENT(request_data)
@@ -35,30 +50,20 @@ def Signup_Data():
     return (" ")
 
 
-@app.route("/login_add", methods=['POST'])
+@app.route("/login_add", methods=['POST', "GET"])
 @cross_origin()
 def Login_Data():
     global check_user
     check_user = False
     request_data = request.get_json()
-    print(request_data)
     check_user = get_data(request_data)
-    print(check_user)
 
-    return ('')
-
-
-@app.route("/login_send", methods=['GET'])
-@cross_origin()
-def Login_Data_Send():
-    print({"state": [str(check_user)]})
     return {"state_type": [str(check_user)]}
 
 
 # Azure code
-
-ENDPOINT = 'https://de44a99c-0ee0-4-231-b9ee.documents.azure.com:443/'
-KEY = 'dJL5ctFaJWB3YUzdl9sUQt5N1VziPj7G9KDf0z6s5zwpyYoDdvAx0GpSESCHCE5IwF072ML7FdpmACDb1hiQBA=='
+ENDPOINT = 'https://vertois-nosql-database.documents.azure.com:443/'
+KEY = 'FH36DyIs9Spu5PuUYEeX9mFVRlEwEsTWErjh6Y1twPFkPwGCcjY8NLclO46ONaWNqp2Dk9dzrUyZACDbBsdI0w=='
 
 
 DATABASE_NAME = "Vertois"
@@ -114,10 +119,16 @@ def PRINTING_SINGLE_ITEM():
 
 
 #                   To Create a Database
+HOST = "bqiawzsj6cs1gnvwn9bf-mysql.services.clever-cloud.com"
+USER = "ujcxzjccio6qgz9f"
+PASSWORD = "XMjoPDVitq97Uz1AjNrb"
+DATABASE = "bqiawzsj6cs1gnvwn9bf"
+
+
 def create_database():
     try:
-        myconn = mys.connect(host="sql12.freemysqlhosting.net",
-                             user="sql12602665", passwd="FAUkhKG9WP", port="3306")
+        myconn = mys.connect(host=HOST,
+                             user=USER, passwd=PASSWORD, port="3306")
         mycur = myconn.cursor()
         query = "create database UserInfo"
         mycur.execute(query)
@@ -131,8 +142,8 @@ def create_database():
 #                   To create a table for CAR MODEL details
 def create_table_user():
     try:
-        myconn = mys.connect(host="sql12.freemysqlhosting.net",
-                             user="sql12602665", passwd="FAUkhKG9WP", database="sql12602665", port="3306")
+        myconn = mys.connect(host=HOST,
+                             user=USER, passwd=PASSWORD, database=DATABASE, port="3306")
         mycur = myconn.cursor()
         query = "CREATE TABLE user_details (name VARCHAR(255), email VARCHAR(255),password VARCHAR(200),ID VARCHAR(255))"
         mycur.execute(query)
@@ -149,8 +160,8 @@ def insert_table_user(details):
         VALUES = list(details["content"].values())
         hashed = bcrypt.hashpw((VALUES[2]).encode("utf-8"), bcrypt.gensalt())
 
-        myconn = mys.connect(host="sql12.freemysqlhosting.net", user="sql12602665",
-                             passwd="FAUkhKG9WP", database="sql12602665")
+        myconn = mys.connect(host=HOST, user=USER,
+                             passwd=PASSWORD, database=DATABASE)
         mycur = myconn.cursor()
         query = "insert into user_details values\
                                             ('{}','{}','{}','{}')".format(VALUES[0], VALUES[1], hashed.decode("utf-8"), '')
@@ -164,8 +175,8 @@ def get_data(id):
     try:
         VALUES = list(id.values())
 
-        myconn = mys.connect(host="sql12.freemysqlhosting.net", user="sql12602665",
-                             passwd="FAUkhKG9WP", database="sql12602665")
+        myconn = mys.connect(host=HOST, user=USER,
+                             passwd=PASSWORD, database=DATABASE)
         if myconn.is_connected():
             print("Succesfully connected")
         mycur = myconn.cursor()
