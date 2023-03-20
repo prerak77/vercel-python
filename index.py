@@ -5,12 +5,15 @@
 # the azure cosmos library allow connectivity to the microsoft azure database
 # flsak cors is used help with cross cors compatibilty
 
-from flask import Flask, json, request, jsonify
+from flask import Flask, json, request, Response, render_template, redirect, send_file, make_response
 import bcrypt
 import json
 from flask_cors import CORS, cross_origin
 from azure.cosmos import CosmosClient, PartitionKey
 import mysql.connector as mys
+import pdfkit
+import pymongo
+
 
 # to initialize the flask framwork
 app = Flask(__name__)
@@ -28,20 +31,50 @@ def home():
 # the entry point for the API is /data and it is using th e POST HTTP request
 
 
-@app.route("/data", methods=['POST'])
+@app.route("/pdf", methods=['POST', "GET"])
 @cross_origin()
+def downloade_data():
+
+    out = render_template('file.html', CIN='cin')
+
+    options = {
+        "orientation": "landscape",
+        "page-size": 'Legal',
+        "margin-top": "1.0cm",
+        "margin-right": "1.0cm",
+        "margin-bottom": "1.0cm",
+        "margin-left": "1.0cm",
+        "encoding": "UTF-8",
+        "enable-local-file-access": ""
+    }
+
+    path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+    config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+
+    # # Build PDF from HTML
+    pdf = pdfkit.from_string(out, options=options, configuration=config)
+    # pdf = pdfkit.from_string(out, options=options,configuration = config)
+
+    # #  Download the PDF
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'attachment; filename=output.pdf'
+    return response
+
+
+@ app.route("/data", methods=['POST'])
+@ cross_origin()
 def members():
     # To retieve the data recieved from the frontend and using the json.load function
     request_data = json.loads(request.data)
     CREATE_DATABASE()
     ADDING_NEW_ELEMENT(request_data)
-    PRINTING_SINGLE_ITEM()
 
     return (" ")
 
 
-@app.route("/signup", methods=['POST'])
-@cross_origin()
+@ app.route("/signup", methods=['POST'])
+@ cross_origin()
 def Signup_Data():
     request_data = json.loads(request.data)
     create_table_user()
@@ -50,8 +83,8 @@ def Signup_Data():
     return (" ")
 
 
-@app.route("/login_add", methods=['POST', "GET"])
-@cross_origin()
+@ app.route("/login_add", methods=['POST', "GET"])
+@ cross_origin()
 def Login_Data():
     global check_user
     check_user = False
@@ -62,25 +95,25 @@ def Login_Data():
 
 
 # Azure code
-ENDPOINT = 'https://vertois-nosql-database.documents.azure.com:443/'
-KEY = 'FH36DyIs9Spu5PuUYEeX9mFVRlEwEsTWErjh6Y1twPFkPwGCcjY8NLclO46ONaWNqp2Dk9dzrUyZACDbBsdI0w=='
+CONNECTION_STRING = 'mongodb://acb84250-0ee0-4-231-b9ee:nBOe35HkdIxwSM5n7buO3au0wIPT7kIrkfqFdR2roCaTDfRaI7UcixtqvC0J5i2DGfnC86MFnxDyACDbmptjEQ==@acb84250-0ee0-4-231-b9ee.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@acb84250-0ee0-4-231-b9ee@'
 
 
-DATABASE_NAME = "Vertois"
-CONTAINER_NAME = "Container1"
+DB_NAME = "Vertois"
+COLLECTION_NAME = "Vertois"
 
-client = CosmosClient(url=ENDPOINT, credential=KEY)
+client = pymongo.MongoClient(CONNECTION_STRING)
+db = client[DB_NAME]
 
 
 def CREATE_DATABASE():
-    global database, key_path, container
-    database = client.create_database_if_not_exists(id=DATABASE_NAME)
-
-    key_path = PartitionKey(path="/Vertois")
-
-    container = database.create_container_if_not_exists(
-        id=CONTAINER_NAME, partition_key=key_path, offer_throughput=400
-    )
+    # Create collection if it doesn't exist
+    collection = db[COLLECTION_NAME]
+    if COLLECTION_NAME not in db.list_collection_names():
+        # Creates a unsharded collection that uses the DBs shared throughput
+        db.command(
+            {"customAction": "CreateCollection", "collection": COLLECTION_NAME}
+        )
+        print("Created collection '{}'.\n".format(COLLECTION_NAME))
 
 
 def ADDING_NEW_ELEMENT(data):
@@ -89,8 +122,7 @@ def ADDING_NEW_ELEMENT(data):
     VALUES = list(data["content"].values())
 
     new_item = {
-        "id":     VALUES[0],
-        "Vertois": "section1",
+        "CIN":     VALUES[0],
         KEYS[1]: VALUES[1],
         KEYS[2]: VALUES[2],
         KEYS[3]: VALUES[3],
@@ -100,24 +132,21 @@ def ADDING_NEW_ELEMENT(data):
         KEYS[7]: VALUES[7],
 
     }
+    collection = db[COLLECTION_NAME]
 
-    container.create_item(new_item)
-
-
-def PRINTING_SINGLE_ITEM():
-    existing_item = container.read_item(
-        item='L28920MH1919PLC000567',
-        partition_key="section1",
+    result = collection.update_one(
+        {"id": new_item["CIN"]}, {"$set": new_item}, upsert=True
     )
-    print("KEYS             VALUES")
-    for i in range(7):
-        print(list(existing_item.keys())[
-              i], "             ", list(existing_item.values())[i])
+
+
+def GET_VALUES(id):
+    ID = list(id["content"].values())
+    collection = db[COLLECTION_NAME]
+    doc = collection.find_one({"id": ID[0]})
+    return doc
 
 
 # MySQL code
-
-
 #                   To Create a Database
 HOST = "bqiawzsj6cs1gnvwn9bf-mysql.services.clever-cloud.com"
 USER = "ujcxzjccio6qgz9f"
@@ -194,6 +223,9 @@ def get_data(id):
                 return False
     except Exception as e:
         print(e)
+
+
+# to generate a pdf of the data
 
 
 if __name__ == '__main__':
