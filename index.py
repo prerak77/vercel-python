@@ -48,7 +48,7 @@ def downloade_data():
         "enable-local-file-access": ""
     }
 
-    path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+    path_wkhtmltopdf = r'/opt/bin/wkhtmltopdf'
     config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 
     # # Build PDF from HTML
