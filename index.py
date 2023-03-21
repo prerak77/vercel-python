@@ -13,6 +13,7 @@ from azure.cosmos import CosmosClient, PartitionKey
 import mysql.connector as mys
 import pdfkit
 import pymongo
+from weasyprint import HTML, CSS
 
 
 # to initialize the flask framwork
@@ -35,7 +36,14 @@ def home():
 @cross_origin()
 def downloade_data():
 
-    out = render_template('file.html', CIN='cin')
+    rendered_html = render_template('file.html', CIN='cin')
+    html = HTML(string=rendered_html)
+    pdf_file = 'file.pdf'
+    css = CSS(string='@page { size: legal landscape; }')
+    html.write_pdf(pdf_file, stylesheets=[css])
+    return send_file(pdf_file, as_attachment=True)
+
+    # out = render_template('file.html', CIN='cin')
 
     options = {
         "orientation": "landscape",
@@ -48,18 +56,15 @@ def downloade_data():
         "enable-local-file-access": ""
     }
 
-    path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-    config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
-
     # # Build PDF from HTML
-    pdf = pdfkit.from_string(out, options=options, configuration=config)
+    pdf = pdfkit.from_string(out, options=options)
     # pdf = pdfkit.from_string(out, options=options,configuration = config)
 
     # #  Download the PDF
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = 'attachment; filename=output.pdf'
-    return response
+    return out
 
 
 @ app.route("/data", methods=['POST'])
