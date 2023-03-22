@@ -13,7 +13,13 @@ from azure.cosmos import CosmosClient, PartitionKey
 import mysql.connector as mys
 import pdfkit
 import pymongo
-from weasyprint import HTML, CSS
+from flask_weasyprint import HTML, render_pdf
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.platypus import Table
+import PyPDF2
+from io import BytesIO
+from docx import Document
 
 
 # to initialize the flask framwork
@@ -24,6 +30,8 @@ app = Flask(__name__)
 
 # this is the loaidng page rout that is used as a starting point for the API
 # Remove later
+
+
 @app.route("/")
 def home():
     return "Hello world"
@@ -35,6 +43,42 @@ def home():
 @app.route("/pdf", methods=['POST', "GET"])
 @cross_origin()
 def downloade_data():
+
+    # Render the HTML template
+    html = render_template('file.html')
+
+    # Generate the PDF
+    pdf = render_pdf(HTML(string=html))
+
+    # Create a response object with the PDF
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'attachment; filename=my_pdf.pdf'
+    return response
+
+    # Create a new PDF using ReportLab
+    pdf = canvas.Canvas('example.pdf')
+
+    # Add content to the PDF
+    pdf.setFont('Helvetica', 12)
+    pdf.drawString(1 * inch, 10.5 * inch, "old")
+
+    # Add a table to the PDF
+    data = [['Name', 'Age', 'Gender'], [
+        'John', '35', 'Male'], ['Jane', '28', 'Female']]
+    table = Table(data)
+    table.wrapOn(pdf, 0, 0)
+    table.drawOn(pdf, 1 * inch, 6 * inch)
+
+    # Save the PDF
+    pdf.save()
+
+    # Return the PDF as a response
+    response = make_response(open('example.pdf', 'rb').read())
+    response.headers.set('Content-Type', 'application/pdf')
+    response.headers.set('Content-Disposition',
+                         'attachment', filename='example.pdf')
+    return response
 
     rendered_html = render_template('file.html', CIN='cin')
     html = HTML(string=rendered_html)
