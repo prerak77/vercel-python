@@ -7,19 +7,10 @@
 
 from flask import Flask, json, request, Response, render_template, redirect, send_file, make_response
 import bcrypt
-import json
 from flask_cors import CORS, cross_origin
-from azure.cosmos import CosmosClient, PartitionKey
 import mysql.connector as mys
-import pdfkit
 import pymongo
 from flask_weasyprint import HTML, render_pdf
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
-from reportlab.platypus import Table
-import PyPDF2
-from io import BytesIO
-from docx import Document
 
 
 # to initialize the flask framwork
@@ -58,57 +49,6 @@ def downloade_data():
 
     # Create a new PDF using ReportLab
     pdf = canvas.Canvas('example.pdf')
-
-    # Add content to the PDF
-    pdf.setFont('Helvetica', 12)
-    pdf.drawString(1 * inch, 10.5 * inch, "old")
-
-    # Add a table to the PDF
-    data = [['Name', 'Age', 'Gender'], [
-        'John', '35', 'Male'], ['Jane', '28', 'Female']]
-    table = Table(data)
-    table.wrapOn(pdf, 0, 0)
-    table.drawOn(pdf, 1 * inch, 6 * inch)
-
-    # Save the PDF
-    pdf.save()
-
-    # Return the PDF as a response
-    response = make_response(open('example.pdf', 'rb').read())
-    response.headers.set('Content-Type', 'application/pdf')
-    response.headers.set('Content-Disposition',
-                         'attachment', filename='example.pdf')
-    return response
-
-    rendered_html = render_template('file.html', CIN='cin')
-    html = HTML(string=rendered_html)
-    pdf_file = 'file.pdf'
-    css = CSS(string='@page { size: legal landscape; }')
-    html.write_pdf(pdf_file, stylesheets=[css])
-    return send_file(pdf_file, as_attachment=True)
-
-    # out = render_template('file.html', CIN='cin')
-
-    options = {
-        "orientation": "landscape",
-        "page-size": 'Legal',
-        "margin-top": "1.0cm",
-        "margin-right": "1.0cm",
-        "margin-bottom": "1.0cm",
-        "margin-left": "1.0cm",
-        "encoding": "UTF-8",
-        "enable-local-file-access": ""
-    }
-
-    # # Build PDF from HTML
-    pdf = pdfkit.from_string(out, options=options)
-    # pdf = pdfkit.from_string(out, options=options,configuration = config)
-
-    # #  Download the PDF
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = 'attachment; filename=output.pdf'
-    return out
 
 
 @ app.route("/data", methods=['POST'])
