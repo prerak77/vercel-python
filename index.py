@@ -33,19 +33,50 @@ def home():
 @app.route("/pdf", methods=['POST', "GET"])
 @cross_origin()
 def downloade_data():
-
+    data = (request.json)['content']
+    CIN = list(data.values())[0]
     # create a new PDF object
     pdf = FPDF()
     pdf.add_page()
 
     # set some properties of the PDF file
-    pdf.set_title('My Example PDF')
-    pdf.set_author('John Doe')
-    pdf.set_subject('An example PDF document')
+    pdf.set_title('BRSR Report')
+    pdf.set_author('Vertois')
+    pdf.set_subject('pdf document for BRSR report')
 
     # add some text to the PDF file
     pdf.set_font('Arial', 'B', 16)
-    pdf.cell(40, 10, 'Hello World!')
+    pdf.cell(40, 10, 'VERTOIS', ln=1)
+
+    pdf.set_font('Arial', 'B', 14)
+    pdf.cell(40, 10, 'Business Responsibility & Sustainability Report', ln=1)
+
+    pdf.set_font('Arial', '', 12)
+    pdf.cell(40, 10, 'I. Details of the listed entity', ln=1)
+
+    pdf.set_font('Arial', "B", 8)
+    pdf.cell(
+        80, 5, '1)     Corporate Identity Number (CIN) of the Listed Entity:', ln=0)
+    pdf.set_font('Arial', "", 8)
+    pdf.cell(
+        10, 5, CIN, ln=1)
+
+    pdf.cell(
+        40, 5, '2)     Name of the Listed Entity: The Tata Power Company Limited', ln=1)
+    pdf.cell(40, 5, '3)     Year of incorporation: 1919', ln=1)
+    pdf.cell(40, 5, '4)     Registered office address: Bombay House, 24, Homi Mody Street, Mumbai - 400 001, Maharashtra, India', ln=1)
+    pdf.cell(40, 5, '5)     Corporate address: Corporate Center, 34 Sant Tukaram Road, Carnac Bunder, Mumbai - 400 009, Maharashtra, India', ln=1)
+    pdf.cell(40, 5, '6)     E-mail: tatapower@tatapower.com', ln=1)
+    pdf.cell(40, 5, '7)     Telephone: 022-6665 8282', ln=1)
+    pdf.cell(40, 5, '8)     Website: www.tatapower.com', ln=1)
+    pdf.cell(40, 5, '9)     Financial year for which reporting is being done: April 2021 - March 2022', ln=1)
+    pdf.cell(40, 5, '10)     Name of the Stock Exchange(s) where shares are listed: BSE Limited and National Stock Exchange of India Limited ', ln=1)
+    pdf.cell(40, 5, '11)     Paid-up Capital: INR 319.56 crore', ln=1)
+    pdf.cell(40, 5, '12)     Name and contact details (telephone, email address) of the person who may be contacted in case of any queries on the BRSR report: ', ln=1)
+    pdf.cell(40, 5, '           Ms. Jyoti Kumar Bansal, Chief-Branding, Corp Communication, CSR & Sustainability', ln=1)
+    pdf.cell(40, 5, '           Email - jyotikumar.bansal@tatapower.com', ln=1)
+    pdf.cell(40, 5, '           Contact Number: 022-6717 1666', ln=1)
+    pdf.cell(40, 5, '13)     Reporting boundary - Are the disclosures under this report made on a standalone basis (i.e. only for the entity) or on a consolidated basis (i.e. for the entity and all the entities which form a part of its consolidated financial statements, taken together): Consolidated basis', ln=1)
 
     # create a response with the PDF file
     response = make_response(pdf.output(dest='S').encode('latin1'))
