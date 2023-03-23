@@ -10,8 +10,7 @@ import bcrypt
 from flask_cors import CORS, cross_origin
 import mysql.connector as mys
 import pymongo
-from flask_weasyprint import HTML, render_pdf
-
+from reportlab.pdfgen import canvas
 
 # to initialize the flask framwork
 app = Flask(__name__)
@@ -35,20 +34,27 @@ def home():
 @cross_origin()
 def downloade_data():
 
-    # Render the HTML template
-    html = render_template('file.html')
-
-    # Generate the PDF
-    pdf = render_pdf(HTML(string=html))
-
-    # Create a response object with the PDF
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = 'attachment; filename=my_pdf.pdf'
-    return response
-
-    # Create a new PDF using ReportLab
+    # Create a new PDF object
     pdf = canvas.Canvas('example.pdf')
+
+    # Add content to the PDF
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(100, 750, "VERTOIS")
+    pdf.setFont("Helvetica", 10)
+    pdf.drawString(100, 700, "Business Responsibility & Sustainability Report")
+    pdf.drawString(100, 680, "SECTION A: GENERAL DISCLOSURES")
+    pdf.drawString(100, 650, "I. Details of the listed entity")
+
+    # Save the PDF
+    pdf.save()
+
+    # Return a Response object with the PDF file
+    with open("example.pdf", 'rb') as f:
+        data = f.read()
+    response = Response(data, content_type='application/pdf')
+    response.headers.set('Content-Disposition',
+                         'attachment', filename='example.pdf')
+    return response
 
 
 @ app.route("/data", methods=['POST'])
