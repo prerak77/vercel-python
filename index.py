@@ -35,6 +35,8 @@ def home():
 def downloade_data():
     data = (request.json)['content']
     CIN = list(data.values())[0]
+    VALUES = GET_VALUES(CIN)
+
     # create a new PDF object
     pdf = FPDF()
     pdf.add_page()
@@ -54,29 +56,102 @@ def downloade_data():
     pdf.set_font('Arial', '', 12)
     pdf.cell(40, 10, 'I. Details of the listed entity', ln=1)
 
+    # The 1st entry is CIN this the hending of the main cin number but the input will come after
+    # the 9th entry to maintain conitnuty in the display
     pdf.set_font('Arial', "B", 8)
     pdf.cell(
-        80, 5, '1)     Corporate Identity Number (CIN) of the Listed Entity:', ln=0)
+        87, 5, '1)     Corporate Identity Number (CIN) of the Listed Entity:', ln=0)
+
+    # the entry is the financial year but this the 9th input but since there must be 2 columns the next
+    # entry in the code is the 9th entry
+    pdf.set_font('Arial', "B", 8)
+    pdf.cell(73, 5, '9)     Financial year for which reporting is being done: ',
+             ln=0, )
+    pdf.set_font('Arial', "", 8)
+    pdf.cell(40, 5, 'April 2021 - March 2022', ln=1, )
+
+    # since the output for the CIN entry must be below the the entry heading just the input is the next
+    # code in order to match the input to be be just below the title
+    pdf.set_font('Arial', "", 8)
+    pdf.cell(10, 5, "          "+CIN, ln=1)
+
+    # the next part of the code is the title for the 2nd entry whicch is the name of the counrty
+    pdf.set_font('Arial', "B", 8)
+    pdf.cell(
+        42, 5, '2)     Name of the Listed Entity: ', ln=0)
+    # snce
     pdf.set_font('Arial', "", 8)
     pdf.cell(
-        10, 5, CIN, ln=1)
+        45, 5, VALUES['Name'], ln=0,)
 
+    pdf.set_font('Arial', "B", 8)
+    pdf.cell(37, 5, '3)     Year of incorporation: ', ln=0)
+    pdf.set_font('Arial', "", 8)
     pdf.cell(
-        40, 5, '2)     Name of the Listed Entity: The Tata Power Company Limited', ln=1)
-    pdf.cell(40, 5, '3)     Year of incorporation: 1919', ln=1)
-    pdf.cell(40, 5, '4)     Registered office address: Bombay House, 24, Homi Mody Street, Mumbai - 400 001, Maharashtra, India', ln=1)
-    pdf.cell(40, 5, '5)     Corporate address: Corporate Center, 34 Sant Tukaram Road, Carnac Bunder, Mumbai - 400 009, Maharashtra, India', ln=1)
-    pdf.cell(40, 5, '6)     E-mail: tatapower@tatapower.com', ln=1)
-    pdf.cell(40, 5, '7)     Telephone: 022-6665 8282', ln=1)
-    pdf.cell(40, 5, '8)     Website: www.tatapower.com', ln=1)
-    pdf.cell(40, 5, '9)     Financial year for which reporting is being done: April 2021 - March 2022', ln=1)
-    pdf.cell(40, 5, '10)     Name of the Stock Exchange(s) where shares are listed: BSE Limited and National Stock Exchange of India Limited ', ln=1)
-    pdf.cell(40, 5, '11)     Paid-up Capital: INR 319.56 crore', ln=1)
-    pdf.cell(40, 5, '12)     Name and contact details (telephone, email address) of the person who may be contacted in case of any queries on the BRSR report: ', ln=1)
-    pdf.cell(40, 5, '           Ms. Jyoti Kumar Bansal, Chief-Branding, Corp Communication, CSR & Sustainability', ln=1)
+        10, 5, VALUES['Year'], ln=1)
+
+    pdf.set_font('Arial', "B", 8)
+    pdf.multi_cell(80, 5, '4)    Registered office address:')
+    pdf.set_font('Arial', "", 8)
+
+    pdf.set_xy(15, 55)
+    pdf.multi_cell(
+        80, 5, "                                           "+VALUES['office Address'])
+
+    pdf.set_font('Arial', "B", 8)
+
+    pdf.cell(35, 5, '5)     Corporate address:')
+
+    pdf.set_xy(96, 55)
+    pdf.set_font('Arial', "B", 8)
+    pdf.cell(40, 5, '11)     Paid-up Capital: ', ln=1)
+    pdf.set_font('Arial', "", 8)
+    pdf.set_xy(127, 55)
+    pdf.cell(
+        10, 5, 'INR 319.56 crore')
+
+    pdf.set_font('Arial', "", 8)
+    pdf.set_xy(15, 65)
+    pdf.multi_cell(
+        80, 5, "                                "+VALUES['Corporate Address'])
+
+    pdf.set_font('Arial', "B", 8)
+    pdf.cell(17, 5, '6)     E-mail:', ln=0)
+    pdf.set_font('Arial', "", 8)
+    pdf.cell(
+        40, 5, VALUES['Email'], ln=1)
+
+    pdf.set_font('Arial', "B", 8)
+    pdf.cell(22, 5, '7)     Telephone:', ln=0)
+    pdf.set_font('Arial', "", 8)
+    pdf.cell(
+        40, 5, VALUES['telephone'], ln=1)
+
+    pdf.set_font('Arial', "B", 8)
+    pdf.cell(20, 5, '8)     Website:', ln=0)
+    pdf.set_font('Arial', "", 8)
+    pdf.cell(40, 5, VALUES['website'], ln=1)
+
+    pdf.set_xy(96, 60)
+    pdf.set_font('Arial', "B", 8)
+    pdf.multi_cell(
+        95, 5, '12)  Name and contact details (telephone, email address) of the person who may be contacted in case of any queries on the BRSR report: ')
+    pdf.set_font('Arial', "", 8)
+    pdf.set_xy(97, 70)
+    pdf.multi_cell(
+        95, 5, '           Ms. Jyoti Kumar Bansal, Chief-Branding, Corp Communication, CSR & Sustainability')
+    pdf.set_xy(88, 80)
     pdf.cell(40, 5, '           Email - jyotikumar.bansal@tatapower.com', ln=1)
+
+    pdf.set_xy(88, 85)
     pdf.cell(40, 5, '           Contact Number: 022-6717 1666', ln=1)
-    pdf.cell(40, 5, '13)     Reporting boundary - Are the disclosures under this report made on a standalone basis (i.e. only for the entity) or on a consolidated basis (i.e. for the entity and all the entities which form a part of its consolidated financial statements, taken together): Consolidated basis', ln=1)
+
+    pdf.set_font('Arial', "B", 8)
+    pdf.set_xy(97, 90)
+    pdf.multi_cell(95, 5, '13) Reporting boundary - Are the disclosures under this report made on a standalone basis (i.e. only for the entity) or on a consolidated basis (i.e. for the entity and all the entities which form a part of its consolidated financial statements, taken together): ')
+    pdf.set_font('Arial', "", 8)
+    pdf.set_xy(157, 105)
+    pdf.cell(40, 5, '           Consolidated basis', ln=1)
 
     # create a response with the PDF file
     response = make_response(pdf.output(dest='S').encode('latin1'))
@@ -120,10 +195,10 @@ def Login_Data():
 
 
 # Azure code
-CONNECTION_STRING = 'mongodb://acb84250-0ee0-4-231-b9ee:nBOe35HkdIxwSM5n7buO3au0wIPT7kIrkfqFdR2roCaTDfRaI7UcixtqvC0J5i2DGfnC86MFnxDyACDbmptjEQ==@acb84250-0ee0-4-231-b9ee.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@acb84250-0ee0-4-231-b9ee@'
+CONNECTION_STRING = 'mongodb+srv://prerakjiwane:X773MuzK2EBte20t@brsrdata.s8idggf.mongodb.net/?retryWrites=true&w=majority'
 
 
-DB_NAME = "Vertois"
+DB_NAME = "BrsrData"
 COLLECTION_NAME = "Vertois"
 
 client = pymongo.MongoClient(CONNECTION_STRING)
@@ -147,7 +222,7 @@ def ADDING_NEW_ELEMENT(data):
     VALUES = list(data["content"].values())
 
     new_item = {
-        "CIN":     VALUES[0],
+        KEYS[0]: VALUES[0],
         KEYS[1]: VALUES[1],
         KEYS[2]: VALUES[2],
         KEYS[3]: VALUES[3],
@@ -155,7 +230,11 @@ def ADDING_NEW_ELEMENT(data):
         KEYS[5]: VALUES[5],
         KEYS[6]: VALUES[6],
         KEYS[7]: VALUES[7],
-
+        KEYS[8]: VALUES[8],
+        KEYS[9]: VALUES[9],
+        KEYS[10]: VALUES[10],
+        KEYS[11]: VALUES[11],
+        KEYS[12]: VALUES[12],
     }
     collection = db[COLLECTION_NAME]
 
@@ -165,9 +244,8 @@ def ADDING_NEW_ELEMENT(data):
 
 
 def GET_VALUES(id):
-    ID = list(id["content"].values())
     collection = db[COLLECTION_NAME]
-    doc = collection.find_one({"id": ID[0]})
+    doc = collection.find_one({"id": id})
     return doc
 
 
