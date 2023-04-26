@@ -240,7 +240,7 @@ def members():
     request_data = json.loads(request.data)
 
     # This function is used to create a MongoDB database that makes adding all the BRSR data
-    CREATE_DATABASE()
+    # CREATE_DATABASE()
 
     # The requested data is then sent to the ADDING_NEW_ELEMENT() function as argument to add the data
     # into the MongoDB database
@@ -299,7 +299,7 @@ CONNECTION_STRING = 'mongodb+srv://vertois234:q4YyK9fEdqYHmkEE@cluster0.yhkwell.
 
 
 DB_NAME = "BrsrData"
-COLLECTION_NAME = "vertois234"
+COLLECTION_NAME = "Vertois"
 
 # This function allows connection to the cloud database using the unique CONNECTION KEY
 client = pymongo.MongoClient(CONNECTION_STRING)
@@ -309,18 +309,6 @@ db = client[DB_NAME]
 
 # This function decleration is used to create a document to store data in the database only if the
 # document does not exist
-
-
-def CREATE_DATABASE():
-    # Create collection if it doesn't exist
-    collection = db[COLLECTION_NAME]
-
-    if COLLECTION_NAME not in db.list_collection_names():
-        # Creates a unsharded collection that uses the DBs shared throughput
-        db.command(
-            {"customAction": "CreateCollection", "collection": COLLECTION_NAME}
-        )
-        print("Created collection '{}'.\n".format(COLLECTION_NAME))
 
 
 # This function is used to add the BRSR data to the document in the database
