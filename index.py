@@ -295,11 +295,11 @@ def Login_Data():
 
 
 # Azure code
-CONNECTION_STRING = 'mongodb+srv://prerakjiwane:X773MuzK2EBte20t@brsrdata.s8idggf.mongodb.net/?retryWrites=true&w=majority'
+CONNECTION_STRING = 'mongodb+srv://vertois234:q4YyK9fEdqYHmkEE@cluster0.yhkwell.mongodb.net/?retryWrites=true&w=majority'
 
 
 DB_NAME = "BrsrData"
-COLLECTION_NAME = "Vertois"
+COLLECTION_NAME = "vertois234"
 
 # This function allows connection to the cloud database using the unique CONNECTION KEY
 client = pymongo.MongoClient(CONNECTION_STRING)
